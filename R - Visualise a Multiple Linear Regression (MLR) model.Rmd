@@ -1,0 +1,89 @@
+---
+title: Visualise a Multiple Linear Regression (MLR) Model
+Source: UC Applied Data Science
+May 2025
+---
+
+Solve the coefficient vector for a Multiple Linear Regression (MLR) model using the Auto dataset. Set up the linear algebra, compute the coefficients analytically, and visualise the 3 variables graphically. Finalise generalising the model to a third feature without visualisation.
+
+```{r}
+#install.packages("ISLR")
+#install.packages(c("plotly", "dplyr"))  # Install plotly and dplyr (for %>%)
+library(ISLR)
+library(plotly)
+library(dplyr)
+```
+
+```{r}
+
+#load the data
+data("Auto")
+str(Auto)
+```
+
+```{r}
+#Create a training and test split. 
+set.seed(123)
+indices <- sample(1:nrow(Auto), 0.8*nrow(Auto))
+train <- Auto[indices,]
+test <- Auto[-indices,]
+```
+
+We will use `weight` and `cylinders` as predictors and `mpg` as response. Some matrix operations are involved in this formula. You can use `solve()` to get the inverse of a matrix, `t()` to transpose a matrix and `%*%` to do matrix multiplication.
+
+```{r}
+# Create an intercept vector. When multiplied by its corresponding coefficient in the regression equation, it contributes the intercept value to the model. 
+intercept <- rep(1, length(indices))
+
+# Create the design matrix A. 
+weight <- train$weight
+cylinders <- train$cylinders
+mpg <- train$mpg
+A <- as.matrix(cbind(intercept, weight, cylinders))
+
+# Prep y for matrix operation. 
+y <- as.matrix(mpg)
+
+# Can you solve b using the analytical solution formula and the functions introduced? 
+b <- solve(t(A) %*% A) %*% t(A) %*% y #
+b
+```
+
+We can visualise the model defined by the coefficient vector as a 2d plane.
+
+```{r}
+# Create a grid of x1 and x2 values for plotting the regression plane
+weight_grid <- seq(min(weight), max(weight), length.out = 30)
+cylinders_grid <- seq(min(cylinders), max(cylinders), length.out = 30)
+grid <- expand.grid(weight = weight_grid, cylinders = cylinders_grid)
+
+# Calculate the corresponding y values on the plane
+plane <- b[1] + b[2] * grid$weight + b[3] * grid$cylinders
+
+# Plot the points and the regression plane
+plot_ly() %>%
+  add_markers(x = weight, y = cylinders, z = mpg, marker = list(color = 'blue', size = 4)) %>%
+  add_surface(x = weight_grid, y = cylinders_grid, z = matrix(plane, nrow = 30, ncol = 30), opacity = 0.6, colorscale = list(c(0, 1), c("red", "red")), showscale = FALSE, name = 'Regression Plane') %>%
+  layout(scene = list(
+    xaxis = list(title = 'weight'),
+    yaxis = list(title = 'cylinders'),
+    zaxis = list(title = 'mpg')
+  ), showlegend = FALSE)
+```
+
+We can also include another feature, `acceleration` for instance, in fitting a multiple linear regression model in the same way as before. However, it will become tricky to visualise the model.
+
+```{r}
+acceleration <- train$acceleration
+new_A <- as.matrix(cbind(A,acceleration))
+new_b <- solve(t(new_A) %*% new_A) %*% t(new_A) %*% y
+new_b
+```
+
+### Summary
+
+-   Coefficients for the 2-feature and 3-feature models.
+
+-   A 3D plot of the regression plane (for 3 variables).
+
+-   Understanding of how MLR works beyond simple linear regression.

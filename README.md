@@ -20,4 +20,4 @@ This repository serves as a personal portfolio and content hub for data engineer
 
 ## Status
 
-This repository is actively maintained and periodically updated as new content is developed or refined. It reflects a commitment to reproducibility, cross-platform fluency, and professional growth in the data engineering and data science domains.
+This repository is actively maintained and periodically updated as new content is developed or refined.
